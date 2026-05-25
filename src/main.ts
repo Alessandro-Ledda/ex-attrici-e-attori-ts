@@ -32,20 +32,21 @@ type Actress = Person & {
 // ritorna un booleano
 function isActress(dati: unknown): dati is Actress {
   return (
-    // condizione di esistenza dati
-    typeof dati === 'object' && dati !== null &&
-    // controllo proprieta id
-    "id" in dati && typeof dati.id === 'number' &&
-    // controllo proprieta name
-    "name" in dati && typeof dati.name === 'string' &&
-    // controllo anno di nascita
-    "birth_year" in dati && typeof dati.birth_year === 'number' &&
-    // controllo anno di morte
-    "death_year" in dati && typeof dati.death_year === 'number' &&
-    // controllo biografia
-    "biografy" in dati && typeof dati.biografy === 'string' &&
-    // controllo image
-    "image" in dati && typeof dati.image === 'string' &&
+    isPerson(dati) &&
+    // // condizione di esistenza dati
+    // typeof dati === 'object' && dati !== null &&
+    // // controllo proprieta id
+    // "id" in dati && typeof dati.id === 'number' &&
+    // // controllo proprieta name
+    // "name" in dati && typeof dati.name === 'string' &&
+    // // controllo anno di nascita
+    // "birth_year" in dati && typeof dati.birth_year === 'number' &&
+    // // controllo anno di morte
+    // "death_year" in dati && typeof dati.death_year === 'number' &&
+    // // controllo biografia
+    // "biografy" in dati && typeof dati.biografy === 'string' &&
+    // // controllo image
+    // "image" in dati && typeof dati.image === 'string' &&
     "most_famous_movies" in dati && dati.most_famous_movies instanceof Array &&
     dati.most_famous_movies.length === 3 &&
     dati.most_famous_movies.every(m => typeof m === 'string') &&
@@ -115,7 +116,7 @@ async function getActresses(ids: number[]): Promise<(Actress | null)[]> {
   }
 }
 
-// BONUS
+// BONUS 1
 function createActress(data: Omit<Actress, "id">): Actress {
   return {
     ...data,
@@ -131,4 +132,52 @@ function updateActress(actress: Actress, update: Partial<Actress>): Actress {
     name: actress.name
 
   }
+}
+
+// BONUS 2
+type ActorsNationality =
+  | ActressNetionality
+  | "New Zealand"
+  | "Hong Kong"
+  | "German"
+  | "Canadian"
+  | "Irish"
+
+type Actor = Person & {
+  known_for: [string, string, string],
+  awards: [string] | [string, string],
+  nationality: ActorsNationality
+}
+
+function isPerson(dati: unknown): dati is Person {
+  return (
+    // condizione di esistenza dati
+    typeof dati === 'object' && dati !== null &&
+    // controllo proprieta id
+    "id" in dati && typeof dati.id === 'number' &&
+    // controllo proprieta name
+    "name" in dati && typeof dati.name === 'string' &&
+    // controllo anno di nascita
+    "birth_year" in dati && typeof dati.birth_year === 'number' &&
+    // controllo anno di morte
+    "death_year" in dati && typeof dati.death_year === 'number' &&
+    // controllo biografia
+    "biografy" in dati && typeof dati.biografy === 'string' &&
+    // controllo image
+    "image" in dati && typeof dati.image === 'string'
+  )
+}
+
+function isActor(dati: unknown): dati is Actress {
+  return (
+    isPerson(dati) &&
+    "known_for" in dati && dati.known_for instanceof Array &&
+    dati.known_for.length === 3 &&
+    dati.known_for.every(m => typeof m === 'string') &&
+
+    "awards" in dati && dati.awards instanceof Array &&
+    (dati.awards.length === 1 || dati.awards.length === 2) &&
+    dati.awards.every(m => typeof m === 'string') &&
+    "nationality" in dati && typeof dati.nationality === 'string'
+  )
 }
