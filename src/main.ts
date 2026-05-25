@@ -114,3 +114,21 @@ async function getActresses(ids: number[]): Promise<(Actress | null)[]> {
     return [];
   }
 }
+
+// BONUS
+function createActress(data: Omit<Actress, "id">): Actress {
+  return {
+    ...data,
+    id: Math.floor(Math.random() * 1000),
+  }
+}
+
+function updateActress(actress: Actress, update: Partial<Actress>): Actress {
+  return {
+    ...actress,
+    ...update,
+    id: actress.id,
+    name: actress.name
+
+  }
+}
