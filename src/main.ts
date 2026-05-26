@@ -168,7 +168,7 @@ function isPerson(dati: unknown): dati is Person {
   )
 }
 
-function isActor(dati: unknown): dati is Actress {
+function isActor(dati: unknown): dati is Actor {
   return (
     isPerson(dati) &&
     "known_for" in dati && dati.known_for instanceof Array &&
@@ -181,3 +181,102 @@ function isActor(dati: unknown): dati is Actress {
     "nationality" in dati && typeof dati.nationality === 'string'
   )
 }
+
+// funzione getActor
+async function getActor(id: number): Promise<Actor | null> {
+  try {
+    const res = await fetch(`http://localhost:3333/actors/${id}`);
+    const dati: unknown = await res.json();
+    if (!isActor(dati)) {
+      throw new Error('il formato dei dati non è valido')
+    }
+    return dati;
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('errore durante il recupero attore :', error)
+    } else {
+      console.error('Errore non definito :', error)
+    }
+    return null;
+  }
+
+}
+
+// funzione getAllActors
+async function getAllActors(): Promise<Actor[]> {
+  try {
+    const res = await fetch(`http://localhost:3333/actors/`);
+    // controllo risposta chiamata
+    if (!res.ok) {
+      throw new Error(`Errore durante la chiamta HTTP ${res.status} : ${res.statusText}`);
+    }
+
+    const dati: unknown = await res.json();
+    if (!(dati instanceof Array)) {
+      throw new Error('Formato dei dati non valido, ci si aspetta un array');
+    }
+    // filtraggio di tutto cio che non è un actor
+    const attoriValidi: Actor[] = dati.filter(isActor);
+    return attoriValidi;
+
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Errore durante il recupero attori', error);
+    } else {
+      console.error('Errore sconosciuto', error);
+    }
+    return [];
+  }
+}
+
+// funzione getActors
+async function getActors(ids: number[]): Promise<(Actor | null)[]> {
+  try {
+    const promises = ids.map(id => getActor(id));
+    return await Promise.all(promises);
+
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error('Errore durante il recupero attori');
+    } else {
+      console.error('Errore sconoscito:', error);
+    }
+    return [];
+  }
+}
+
+//funzione createActor
+function createActor(data: Omit<Actor, "id">): Actor {
+  return {
+    ...data,
+    id: Math.floor(Math.random() * 1000),
+  }
+}
+
+// funzione updateActor
+function updateActor(actor: Actor, update: Partial<Actor>): Actor {
+  return {
+    ...actor,
+    ...update,
+    id: actor.id,
+    name: actor.name
+
+  }
+}
+
+
+
+
+
+
+
+// BONUS 3
+async function createRandomCouple(): Promise<[Actress, Actor] | null> {
+  const [actresses, actors] = await Promise.all([getAllActress(), getAllActors()]);
+  if (actresses.length === 0 || actors.length === 0) {
+    return null;
+  }
+  const randomActress = actresses[Math.floor(Math.random() * actresses.length)];
+  const randomActor = actors[Math.floor(Math.random() * actors.length)];
+  return [randomActress, randomActor]
+} 
